@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reddit Summarizer</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Main Page -->
+    <div id="main-page">
+      <header>
+        <h1>🔥 Reddit Summarizer</h1>
+        <button id="openSettings" class="btn-icon" title="Settings">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </button>
+      </header>
+
+      <div id="content-section" class="section">
+        <div id="postInfo" class="post-info hidden">
+          <h3 id="postTitle"></h3>
+          <p id="postMeta"></p>
+        </div>
+
+        <div class="options">
+          <label>
+            <input type="checkbox" id="includeComments" checked>
+            Include top comments
+          </label>
+          <div class="comment-count">
+            <label for="commentLimit">Max comments:</label>
+            <input type="number" id="commentLimit" value="20" min="5" max="100">
+          </div>
+          <div class="language-select">
+            <label for="language">Summary language:</label>
+            <select id="language">
+              <option value="English">English</option>
+              <option value="Spanish">Spanish</option>
+              <option value="French">French</option>
+              <option value="German">German</option>
+              <option value="Italian">Italian</option>
+              <option value="Portuguese">Portuguese</option>
+              <option value="Russian">Russian</option>
+              <option value="Japanese">Japanese</option>
+              <option value="Korean">Korean</option>
+              <option value="Chinese (Simplified)">Chinese (Simplified)</option>
+              <option value="Chinese (Traditional)">Chinese (Traditional)</option>
+              <option value="Arabic">Arabic</option>
+              <option value="Hindi">Hindi</option>
+              <option value="Vietnamese">Vietnamese</option>
+              <option value="Thai">Thai</option>
+              <option value="Indonesian">Indonesian</option>
+            </select>
+          </div>
+        </div>
+
+        <button id="summarizeBtn" class="btn-primary">
+          <span class="btn-text">Summarize This Post</span>
+          <span class="btn-loading hidden">
+            <span class="spinner"></span>
+            Summarizing...
+          </span>
+        </button>
+
+        <div id="errorMessage" class="error hidden"></div>
+        <div id="notRedditMessage" class="warning hidden">
+          Please navigate to a Reddit post to use this extension.
+        </div>
+      </div>
+
+      <div id="result-section" class="section hidden">
+        <h2>Summary</h2>
+        <div id="summaryContent" class="summary-content"></div>
+        <div class="actions">
+          <button id="copyBtn" class="btn-secondary">Copy to Clipboard</button>
+          <button id="newSummaryBtn" class="btn-secondary">New Summary</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings Page -->
+    <div id="settings-page" class="hidden">
+      <header>
+        <button id="backToMain" class="btn-icon" title="Back">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 12H5M12 19l-7-7 7-7"></path>
+          </svg>
+        </button>
+        <h1>Settings</h1>
+        <div class="header-spacer"></div>
+      </header>
+
+      <div class="section">
+        <div class="settings-group">
+          <h3>API Configuration</h3>
+          <div class="api-key-container">
+            <label for="apiKey">OpenAI API Key:</label>
+            <input type="password" id="apiKey" placeholder="sk-...">
+            <div class="api-key-actions">
+              <button id="saveApiKey" class="btn-small">Save Key</button>
+              <button id="deleteApiKey" class="btn-small btn-danger">Delete Key</button>
+            </div>
+            <span id="apiKeyStatus" class="status"></span>
+          </div>
+        </div>
+
+        <div class="settings-info">
+          <p>Your API key is stored locally in Chrome and is never sent anywhere except OpenAI's servers.</p>
+          <a href="https://platform.openai.com/api-keys" target="_blank" class="link">Get an API key from OpenAI</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
