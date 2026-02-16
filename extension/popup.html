@@ -8,8 +8,44 @@
     </head>
     <body>
         <div class="container">
-            <!-- Main Page -->
-            <div id="main-page">
+            <!-- Auth Section (Not signed in) -->
+            <div id="auth-section" class="hidden">
+                <header>
+                    <h1>🔥 Redditist</h1>
+                    <div class="header-spacer"></div>
+                </header>
+                <div class="section">
+                    <div class="auth-prompt">
+                        <p>Sign in to your Redditist account to start summarizing Reddit posts with AI.</p>
+                        <button id="signInBtn" class="btn-primary">Sign In</button>
+                        <p class="auth-subtext">Don't have an account? <a href="http://localhost:3000/sign-up" target="_blank" class="link">Sign up</a></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- No Subscription Section -->
+            <div id="no-sub-section" class="hidden">
+                <header>
+                    <h1>🔥 Redditist</h1>
+                    <button id="signOutBtn1" class="btn-icon" title="Sign Out">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                            <polyline points="16 17 21 12 16 7"></polyline>
+                            <line x1="21" y1="12" x2="9" y2="12"></line>
+                        </svg>
+                    </button>
+                </header>
+                <div class="section">
+                    <div class="auth-prompt">
+                        <p>You need an active subscription to use Redditist.</p>
+                        <button id="subscribeBtn" class="btn-primary">Subscribe Now</button>
+                        <p class="auth-subtext"><a href="http://localhost:3000/dashboard" target="_blank" class="link">Go to Dashboard</a></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Page (Signed in + active sub) -->
+            <div id="main-page" class="hidden">
                 <header>
                     <h1>🔥 Redditist</h1>
                     <button id="openSettings" class="btn-icon" title="Settings">
@@ -105,30 +141,6 @@
 
                 <div class="section">
                     <div class="settings-group">
-                        <h3>API Configuration</h3>
-                        <div class="api-key-container">
-                            <label for="apiKey">OpenAI API Key:</label>
-                            <input
-                                type="password"
-                                id="apiKey"
-                                placeholder="sk-..."
-                            />
-                            <div class="api-key-actions">
-                                <button id="saveApiKey" class="btn-small">
-                                    Save Key
-                                </button>
-                                <button
-                                    id="deleteApiKey"
-                                    class="btn-small btn-danger"
-                                >
-                                    Delete Key
-                                </button>
-                            </div>
-                            <span id="apiKeyStatus" class="status"></span>
-                        </div>
-                    </div>
-
-                    <div class="settings-group">
                         <h3>Summary Language</h3>
                         <div class="language-select">
                             <select id="language">
@@ -156,17 +168,29 @@
                         </div>
                     </div>
 
-                    <div class="settings-info">
-                        <p>
-                            Your API key is stored locally in Chrome and is
-                            never sent anywhere except OpenAI's servers.
-                        </p>
-                        <a
-                            href="https://platform.openai.com/api-keys"
-                            target="_blank"
-                            class="link"
-                            >Get an API key from OpenAI</a
-                        >
+                    <div class="settings-group">
+                        <h3>Account</h3>
+                        <div class="account-info">
+                            <p id="accountStatus">Checking...</p>
+                            <div class="api-key-actions">
+                                <a href="http://localhost:3000/dashboard" target="_blank" class="btn-small">Manage Subscription</a>
+                                <button id="signOutBtn2" class="btn-small btn-danger">Sign Out</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading state -->
+            <div id="loading-section">
+                <header>
+                    <h1>🔥 Redditist</h1>
+                    <div class="header-spacer"></div>
+                </header>
+                <div class="section">
+                    <div class="auth-prompt">
+                        <span class="spinner"></span>
+                        <p>Loading...</p>
                     </div>
                 </div>
             </div>

@@ -1,90 +1,129 @@
-// Background service worker for API calls
+// Background service worker for Redditist
+// Handles backend API calls and auth token from website
 
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.action === 'summarize') {
-    summarizeWithOpenAI(request.data, request.apiKey, request.language || 'English')
-      .then(summary => sendResponse({ success: true, summary }))
-      .catch(error => sendResponse({ success: false, error: error.message }));
-    return true; // Required for async response
+const API_BASE = 'http://localhost:3000'; // Change to https://redditist.com in production
+const SUB_CACHE_TTL = 10 * 60 * 1000; // 10 minutes
+
+// Listen for auth token from website (externally_connectable)
+chrome.runtime.onMessageExternal.addListener((message, sender, sendResponse) => {
+  if (message.type === 'AUTH_TOKEN' && message.token) {
+    chrome.storage.local.set({
+      authToken: message.token,
+      authTokenTime: Date.now()
+    }, () => {
+      // Clear cached subscription status on new login
+      chrome.storage.local.remove('subscriptionCache');
+      sendResponse({ success: true });
+    });
+    return true;
   }
 });
 
-async function summarizeWithOpenAI(redditData, apiKey, language) {
-  const prompt = buildPrompt(redditData);
+// Listen for messages from popup
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.action === 'summarize') {
+    handleSummarize(request.data, request.language || 'English')
+      .then(summary => sendResponse({ success: true, summary }))
+      .catch(error => sendResponse({ success: false, error: error.message }));
+    return true;
+  }
 
-  const languageInstruction = language !== 'English'
-    ? `\n\nIMPORTANT: Write the entire summary in ${language}.`
-    : '';
+  if (request.action === 'checkSubscription') {
+    handleCheckSubscription()
+      .then(result => sendResponse(result))
+      .catch(error => sendResponse({ active: false, error: error.message }));
+    return true;
+  }
 
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+  if (request.action === 'getAuthState') {
+    chrome.storage.local.get(['authToken'], (stored) => {
+      sendResponse({ signedIn: !!stored.authToken });
+    });
+    return true;
+  }
+
+  if (request.action === 'signOut') {
+    chrome.storage.local.remove(['authToken', 'authTokenTime', 'subscriptionCache'], () => {
+      sendResponse({ success: true });
+    });
+    return true;
+  }
+});
+
+async function handleSummarize(redditData, language) {
+  const stored = await chrome.storage.local.get(['authToken']);
+  const token = stored.authToken;
+
+  if (!token) {
+    throw new Error('Please sign in first.');
+  }
+
+  const res = await fetch(`${API_BASE}/api/summarize`, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${apiKey}`
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
     },
-    body: JSON.stringify({
-      model: 'gpt-4o-mini',
-      messages: [
-        {
-          role: 'system',
-          content: `You are a helpful assistant that summarizes Reddit posts and their comment discussions.
-Provide clear, concise summaries that capture:
-1. The main topic/question of the post
-2. Key points from the discussion
-3. The general sentiment and consensus (if any)
-4. Notable differing opinions
-
-Format the summary in a readable way with clear sections.${languageInstruction}`
-        },
-        {
-          role: 'user',
-          content: prompt
-        }
-      ],
-      max_tokens: 1000,
-      temperature: 0.7
-    })
+    body: JSON.stringify({ redditData, language })
   });
 
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    if (response.status === 401) {
-      throw new Error('Invalid API key. Please check your OpenAI API key.');
-    } else if (response.status === 429) {
-      throw new Error('Rate limit exceeded. Please wait a moment and try again.');
-    } else if (response.status === 402 || response.status === 403) {
-      throw new Error('API access denied. Check your OpenAI account billing status.');
+  if (!res.ok) {
+    if (res.status === 401) {
+      chrome.storage.local.remove(['authToken', 'authTokenTime', 'subscriptionCache']);
+      throw new Error('Session expired. Please sign in again.');
     }
-    throw new Error(errorData.error?.message || `API error: ${response.status}`);
+    if (res.status === 403) {
+      throw new Error('No active subscription. Please subscribe to use Redditist.');
+    }
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || `API error: ${res.status}`);
   }
 
-  const data = await response.json();
-  return data.choices[0].message.content;
+  const data = await res.json();
+  return data.summary;
 }
 
-function buildPrompt(redditData) {
-  let prompt = `Please summarize this Reddit post and its discussion:\n\n`;
+async function handleCheckSubscription() {
+  // Check cache first
+  const stored = await chrome.storage.local.get(['authToken', 'subscriptionCache']);
+  const token = stored.authToken;
 
-  prompt += `**Subreddit:** r/${redditData.subreddit}\n`;
-  prompt += `**Title:** ${redditData.title}\n`;
-  prompt += `**Author:** u/${redditData.author}\n`;
-  prompt += `**Score:** ${redditData.score}\n\n`;
-
-  if (redditData.postContent) {
-    prompt += `**Post Content:**\n${redditData.postContent}\n\n`;
+  if (!token) {
+    return { active: false, signedIn: false };
   }
 
-  if (redditData.comments && redditData.comments.length > 0) {
-    prompt += `**Top Comments (${redditData.comments.length}):**\n\n`;
-
-    redditData.comments.forEach((comment, index) => {
-      const indent = '  '.repeat(comment.depth);
-      prompt += `${indent}${index + 1}. [${comment.score} points] u/${comment.author}:\n`;
-      prompt += `${indent}   "${comment.content}"\n\n`;
-    });
+  // Return cached result if still valid
+  if (stored.subscriptionCache) {
+    const cache = stored.subscriptionCache;
+    if (Date.now() - cache.timestamp < SUB_CACHE_TTL) {
+      return { ...cache.data, signedIn: true };
+    }
   }
 
-  prompt += `\nPlease provide a comprehensive summary of this post and the discussion in the comments.`;
+  const res = await fetch(`${API_BASE}/api/subscription/status`, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
+  });
 
-  return prompt;
+  if (!res.ok) {
+    if (res.status === 401) {
+      chrome.storage.local.remove(['authToken', 'authTokenTime', 'subscriptionCache']);
+      return { active: false, signedIn: false };
+    }
+    throw new Error('Failed to check subscription');
+  }
+
+  const data = await res.json();
+
+  // Cache the result
+  await chrome.storage.local.set({
+    subscriptionCache: {
+      data,
+      timestamp: Date.now()
+    }
+  });
+
+  return { ...data, signedIn: true };
 }
