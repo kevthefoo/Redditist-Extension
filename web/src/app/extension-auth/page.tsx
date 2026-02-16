@@ -12,8 +12,7 @@ export default function ExtensionAuthPage() {
 
   useEffect(() => {
     if (!isSignedIn) {
-      // Redirect to sign-in, then back here
-      window.location.href = `/sign-in?redirect_url=${encodeURIComponent("/extension-auth" + window.location.search)}`;
+      window.location.href = `/?auth=sign-in`;
       return;
     }
 

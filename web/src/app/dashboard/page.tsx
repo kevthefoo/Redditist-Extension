@@ -1,9 +1,10 @@
 "use client";
 
-import { Button } from "@heroui/react";
-import { useUser, UserButton } from "@clerk/nextjs";
+import { Button, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Avatar } from "@heroui/react";
+import { useUser, useClerk } from "@clerk/nextjs";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 interface SubscriptionData {
   active: boolean;
@@ -16,6 +17,8 @@ interface SubscriptionData {
 
 export default function DashboardPage() {
   const { user } = useUser();
+  const { signOut } = useClerk();
+  const router = useRouter();
   const [subData, setSubData] = useState<SubscriptionData | null>(null);
   const [loading, setLoading] = useState(true);
   const [portalLoading, setPortalLoading] = useState(false);
@@ -59,9 +62,39 @@ export default function DashboardPage() {
           <Link href="/" className="text-xl font-bold text-orange-500">
             🔥 Redditist
           </Link>
-          <div className="flex items-center gap-4">
-            <UserButton />
-          </div>
+          <Dropdown placement="bottom-end" classNames={{ content: "bg-zinc-900 border border-white/10" }}>
+            <DropdownTrigger>
+              <button className="flex items-center gap-2.5 rounded-full border border-white/10 bg-white/5 py-1.5 pl-1.5 pr-4 transition-colors hover:bg-white/10">
+                <Avatar
+                  src={user?.imageUrl}
+                  name={user?.firstName || user?.emailAddresses[0]?.emailAddress?.charAt(0)}
+                  size="sm"
+                  className="h-7 w-7"
+                />
+                <span className="text-sm font-medium text-zinc-300">
+                  {user?.firstName || user?.emailAddresses[0]?.emailAddress}
+                </span>
+                <svg className="h-4 w-4 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+            </DropdownTrigger>
+            <DropdownMenu aria-label="User menu" onAction={(key) => {
+              if (key === "sign-out") {
+                signOut(() => router.push("/"));
+              }
+            }}>
+              <DropdownItem key="profile" isReadOnly className="opacity-100">
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium text-white">{user?.fullName || "User"}</span>
+                  <span className="text-xs text-zinc-500">{user?.emailAddresses[0]?.emailAddress}</span>
+                </div>
+              </DropdownItem>
+              <DropdownItem key="sign-out" className="text-red-400" color="danger">
+                Sign Out
+              </DropdownItem>
+            </DropdownMenu>
+          </Dropdown>
         </div>
       </nav>
 

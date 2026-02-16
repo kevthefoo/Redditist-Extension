@@ -24,24 +24,32 @@ export async function GET() {
     );
   }
 
-  const [subscription] = await db
-    .select()
-    .from(subscriptions)
-    .where(
-      and(eq(subscriptions.userId, userId), eq(subscriptions.status, "active"))
-    );
+  try {
+    const [subscription] = await db
+      .select()
+      .from(subscriptions)
+      .where(
+        and(eq(subscriptions.userId, userId), eq(subscriptions.status, "active"))
+      );
 
-  return NextResponse.json(
-    {
-      active: !!subscription,
-      subscription: subscription
-        ? {
-            status: subscription.status,
-            currentPeriodEnd: subscription.currentPeriodEnd,
-            cancelAtPeriodEnd: subscription.cancelAtPeriodEnd,
-          }
-        : null,
-    },
-    { headers: CORS_HEADERS }
-  );
+    return NextResponse.json(
+      {
+        active: !!subscription,
+        subscription: subscription
+          ? {
+              status: subscription.status,
+              currentPeriodEnd: subscription.currentPeriodEnd,
+              cancelAtPeriodEnd: subscription.cancelAtPeriodEnd,
+            }
+          : null,
+      },
+      { headers: CORS_HEADERS }
+    );
+  } catch {
+    // DB not configured yet — treat as no subscription
+    return NextResponse.json(
+      { active: false, subscription: null },
+      { headers: CORS_HEADERS }
+    );
+  }
 }
