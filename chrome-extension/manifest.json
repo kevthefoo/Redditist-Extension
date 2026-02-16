@@ -11,16 +11,8 @@
   "host_permissions": [
     "https://www.reddit.com/*",
     "https://old.reddit.com/*",
-    "https://redditist.com/*",
-    "https://www.redditist.com/*",
     "https://api.openai.com/*"
   ],
-  "externally_connectable": {
-    "matches": [
-      "https://redditist.com/*",
-      "https://www.redditist.com/*"
-    ]
-  },
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
@@ -37,15 +29,6 @@
       ],
       "js": [
         "content.js"
-      ]
-    },
-    {
-      "matches": [
-        "https://redditist.com/*",
-        "https://www.redditist.com/*"
-      ],
-      "js": [
-        "auth-content.js"
       ]
     }
   ],

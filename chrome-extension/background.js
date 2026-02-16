@@ -1,38 +1,7 @@
 // Background service worker for Redditist
-// Handles backend API calls, auth token from website, and direct OpenAI calls
+// Handles OpenAI API calls for Reddit post summarization
 
-const API_BASE = 'https://redditist.com';
-const SUB_CACHE_TTL = 10 * 60 * 1000; // 10 minutes
-
-// Listen for auth token from website (externally_connectable)
-chrome.runtime.onMessageExternal.addListener((message, sender, sendResponse) => {
-  if (message.type === 'AUTH_TOKEN' && message.token) {
-    chrome.storage.local.set({
-      authToken: message.token,
-      authTokenTime: Date.now()
-    }, () => {
-      // Clear cached subscription status on new login
-      chrome.storage.local.remove('subscriptionCache');
-      sendResponse({ success: true });
-    });
-    return true;
-  }
-});
-
-// Listen for messages from popup and content scripts
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  // Auth token from content script on redditist.com
-  if (request.type === 'AUTH_TOKEN' && request.token) {
-    chrome.storage.local.set({
-      authToken: request.token,
-      authTokenTime: Date.now()
-    }, () => {
-      chrome.storage.local.remove('subscriptionCache');
-      sendResponse({ success: true });
-    });
-    return true;
-  }
-
   if (request.action === 'summarize') {
     handleSummarize(request.data, request.language || 'English')
       .then(summary => sendResponse({ success: true, summary }))
@@ -43,27 +12,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           sendResponse({ success: false, error: error.message });
         }
       });
-    return true;
-  }
-
-  if (request.action === 'checkSubscription') {
-    handleCheckSubscription()
-      .then(result => sendResponse(result))
-      .catch(error => sendResponse({ active: false, error: error.message }));
-    return true;
-  }
-
-  if (request.action === 'getAuthState') {
-    chrome.storage.local.get(['authToken'], (stored) => {
-      sendResponse({ signedIn: !!stored.authToken });
-    });
-    return true;
-  }
-
-  if (request.action === 'signOut') {
-    chrome.storage.local.remove(['authToken', 'authTokenTime', 'subscriptionCache'], () => {
-      sendResponse({ success: true });
-    });
     return true;
   }
 });
@@ -91,22 +39,15 @@ function buildPrompt(redditData, language) {
 }
 
 async function handleSummarize(redditData, language) {
-  const stored = await chrome.storage.local.get(['openaiKey', 'authToken']);
+  const stored = await chrome.storage.local.get(['openaiKey']);
 
-  // Priority 1: User's own OpenAI key
-  if (stored.openaiKey) {
-    return summarizeWithOpenAI(stored.openaiKey, redditData, language);
+  if (!stored.openaiKey) {
+    const err = new Error('No API key found. Go to Settings to add your OpenAI API key.');
+    err.needsSetup = true;
+    throw err;
   }
 
-  // Priority 2: Redditist subscription
-  if (stored.authToken) {
-    return summarizeWithBackend(stored.authToken, redditData, language);
-  }
-
-  // No key and no subscription
-  const err = new Error('No API key or subscription found. Go to Settings to add your OpenAI API key or sign in to your Redditist account.');
-  err.needsSetup = true;
-  throw err;
+  return summarizeWithOpenAI(stored.openaiKey, redditData, language);
 }
 
 async function summarizeWithOpenAI(apiKey, redditData, language) {
@@ -142,75 +83,4 @@ async function summarizeWithOpenAI(apiKey, redditData, language) {
 
   const data = await res.json();
   return data.choices[0].message.content;
-}
-
-async function summarizeWithBackend(token, redditData, language) {
-  const res = await fetch(`${API_BASE}/api/summarize`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ redditData, language })
-  });
-
-  if (!res.ok) {
-    if (res.status === 401) {
-      chrome.storage.local.remove(['authToken', 'authTokenTime', 'subscriptionCache']);
-      throw new Error('Session expired. Please sign in again in Settings.');
-    }
-    if (res.status === 403) {
-      throw new Error('No active subscription. Subscribe or add your own OpenAI API key in Settings.');
-    }
-    const data = await res.json().catch(() => ({}));
-    throw new Error(data.error || `API error: ${res.status}`);
-  }
-
-  const data = await res.json();
-  return data.summary;
-}
-
-async function handleCheckSubscription() {
-  // Check cache first
-  const stored = await chrome.storage.local.get(['authToken', 'subscriptionCache']);
-  const token = stored.authToken;
-
-  if (!token) {
-    return { active: false, signedIn: false };
-  }
-
-  // Return cached result if still valid
-  if (stored.subscriptionCache) {
-    const cache = stored.subscriptionCache;
-    if (Date.now() - cache.timestamp < SUB_CACHE_TTL) {
-      return { ...cache.data, signedIn: true };
-    }
-  }
-
-  const res = await fetch(`${API_BASE}/api/subscription/status`, {
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    }
-  });
-
-  if (!res.ok) {
-    if (res.status === 401) {
-      chrome.storage.local.remove(['authToken', 'authTokenTime', 'subscriptionCache']);
-      return { active: false, signedIn: false };
-    }
-    throw new Error('Failed to check subscription');
-  }
-
-  const data = await res.json();
-
-  // Cache the result
-  await chrome.storage.local.set({
-    subscriptionCache: {
-      data,
-      timestamp: Date.now()
-    }
-  });
-
-  return { ...data, signedIn: true };
 }

@@ -1,10 +1,7 @@
 // Popup script for Redditist
 
-const APP_URL = 'https://redditist.com';
-
 document.addEventListener('DOMContentLoaded', async () => {
   // Sections
-  const loadingSection = document.getElementById('loading-section');
   const mainPage = document.getElementById('main-page');
   const settingsPage = document.getElementById('settings-page');
 
@@ -17,11 +14,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const saveKeyBtn = document.getElementById('saveKeyBtn');
   const clearKeyBtn = document.getElementById('clearKeyBtn');
   const keyStatus = document.getElementById('keyStatus');
-  const signInBtn = document.getElementById('signInBtn');
-  const signOutBtn = document.getElementById('signOutBtn');
-  const signedOutActions = document.getElementById('signedOutActions');
-  const signedInActions = document.getElementById('signedInActions');
-  const accountStatus = document.getElementById('accountStatus');
 
   // Main page elements
   const postTitle = document.getElementById('postTitle');
@@ -42,7 +34,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const newSummaryBtn = document.getElementById('newSummaryBtn');
 
   function hideAllSections() {
-    loadingSection.classList.add('hidden');
     mainPage.classList.add('hidden');
     settingsPage.classList.add('hidden');
   }
@@ -52,12 +43,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     section.classList.remove('hidden');
   }
 
-  // Go straight to main page — no auth gate
+  // Go straight to main page
   showSection(mainPage);
   initMainPage();
 
   // Load saved language
-  const stored = await chrome.storage.local.get(['summaryLanguage', 'openaiKey']);
+  const stored = await chrome.storage.local.get(['summaryLanguage']);
   if (stored.summaryLanguage) {
     languageSelect.value = stored.summaryLanguage;
   }
@@ -68,21 +59,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   // --- Settings ---
-
-  // Sign In
-  signInBtn.addEventListener('click', () => {
-    chrome.tabs.create({
-      url: `${APP_URL}/extension-auth`
-    });
-  });
-
-  // Sign Out
-  signOutBtn.addEventListener('click', async () => {
-    await new Promise((resolve) => {
-      chrome.runtime.sendMessage({ action: 'signOut' }, resolve);
-    });
-    updateAccountUI();
-  });
 
   // Save OpenAI key
   saveKeyBtn.addEventListener('click', async () => {
@@ -120,44 +96,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       openaiKeyInput.placeholder = 'sk-...';
     }
     openaiKeyInput.value = '';
-    updateAccountUI();
     showSection(settingsPage);
   });
 
   backToMainBtn.addEventListener('click', () => {
     showSection(mainPage);
   });
-
-  async function updateAccountUI() {
-    try {
-      const result = await new Promise((resolve) => {
-        chrome.runtime.sendMessage({ action: 'checkSubscription' }, resolve);
-      });
-
-      if (result && result.signedIn) {
-        signedOutActions.classList.add('hidden');
-        signedInActions.classList.remove('hidden');
-        if (result.active && result.subscription) {
-          const endDate = new Date(result.subscription.currentPeriodEnd).toLocaleDateString();
-          let status = `Active subscription (renews ${endDate})`;
-          if (result.subscription.cancelAtPeriodEnd) {
-            status = `Cancels on ${endDate}`;
-          }
-          accountStatus.textContent = status;
-        } else {
-          accountStatus.textContent = 'Signed in — no active subscription';
-        }
-      } else {
-        signedOutActions.classList.remove('hidden');
-        signedInActions.classList.add('hidden');
-        accountStatus.textContent = 'Not signed in';
-      }
-    } catch {
-      signedOutActions.classList.remove('hidden');
-      signedInActions.classList.add('hidden');
-      accountStatus.textContent = 'Not signed in';
-    }
-  }
 
   // --- Main Page ---
 
@@ -230,7 +174,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (!result.success) {
           if (result.needsSetup) {
-            throw new Error('No API key or subscription found. Go to Settings to add your OpenAI API key or sign in to your Redditist account.');
+            throw new Error('No API key found. Go to Settings to add your OpenAI API key.');
           }
           throw new Error(result.error);
         }

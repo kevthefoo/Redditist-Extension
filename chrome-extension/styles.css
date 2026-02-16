@@ -373,54 +373,6 @@ header h1 {
   border-color: #4a4a4c;
 }
 
-/* Auth prompt styles */
-.auth-prompt {
-  text-align: center;
-  padding: 20px 0;
-}
-
-.auth-prompt p {
-  font-size: 14px;
-  line-height: 1.6;
-  color: #818384;
-  margin-bottom: 16px;
-}
-
-.auth-prompt .btn-primary {
-  margin-bottom: 12px;
-}
-
-.auth-subtext {
-  font-size: 12px !important;
-  color: #818384 !important;
-}
-
-.auth-subtext .link {
-  color: #ff4500;
-  text-decoration: none;
-}
-
-.auth-subtext .link:hover {
-  text-decoration: underline;
-}
-
-.settings-hint {
-  font-size: 12px;
-  color: #818384;
-  margin-bottom: 8px;
-}
-
-.account-info {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.account-info p {
-  font-size: 13px;
-  color: #d7dadc;
-}
-
 .btn-small {
   text-decoration: none;
   text-align: center;

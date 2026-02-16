@@ -11,7 +11,7 @@
             <!-- Main Page -->
             <div id="main-page" class="hidden">
                 <header>
-                    <h1>🔥 Redditist</h1>
+                    <h1>Redditist</h1>
                     <button id="openSettings" class="btn-icon" title="Settings">
                         <svg
                             width="20"
@@ -107,7 +107,7 @@
                     <div class="settings-group">
                         <h3>OpenAI API Key</h3>
                         <div class="api-key-container">
-                            <label>Use your own OpenAI key for free, unlimited summaries</label>
+                            <label>Enter your OpenAI API key to enable summarization</label>
                             <input type="password" id="openaiKeyInput" placeholder="sk-..." />
                             <div class="api-key-actions">
                                 <button id="saveKeyBtn" class="btn-small">Save Key</button>
@@ -143,40 +143,6 @@
                                 <option value="Indonesian">Indonesian</option>
                             </select>
                         </div>
-                    </div>
-
-                    <div class="settings-group">
-                        <h3>Redditist Account</h3>
-                        <div class="account-info">
-                            <p id="accountStatus">Not signed in</p>
-                            <div id="signedOutActions">
-                                <p class="settings-hint">Sign in to use our service instead of your own API key</p>
-                                <div class="api-key-actions">
-                                    <button id="signInBtn" class="btn-small">Sign In</button>
-                                    <a href="https://redditist.com/sign-up" target="_blank" class="btn-small">Sign Up</a>
-                                </div>
-                            </div>
-                            <div id="signedInActions" class="hidden">
-                                <div class="api-key-actions">
-                                    <a href="https://redditist.com/dashboard" target="_blank" class="btn-small">Manage Subscription</a>
-                                    <button id="signOutBtn" class="btn-small btn-danger">Sign Out</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Loading state -->
-            <div id="loading-section">
-                <header>
-                    <h1>🔥 Redditist</h1>
-                    <div class="header-spacer"></div>
-                </header>
-                <div class="section">
-                    <div class="auth-prompt">
-                        <span class="spinner"></span>
-                        <p>Loading...</p>
                     </div>
                 </div>
             </div>
