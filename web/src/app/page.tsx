@@ -4,7 +4,7 @@ import { Button } from "@heroui/react";
 import { useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import AuthModal from "@/components/auth-modal";
 
 export default function LandingPage() {
@@ -13,16 +13,15 @@ export default function LandingPage() {
     const [authOpen, setAuthOpen] = useState(false);
     const [authMode, setAuthMode] = useState<"sign-in" | "sign-up">("sign-up");
 
-    // Auto-open modal if redirected from protected route
-    useEffect(() => {
-        const authParam = searchParams.get("auth");
-        if (authParam === "sign-in" || authParam === "sign-up") {
-            openAuth(authParam);
-        }
-    }, [searchParams]);
-
     function openAuth(mode: "sign-in" | "sign-up") {
         setAuthMode(mode);
+        setAuthOpen(true);
+    }
+
+    // Auto-open modal if redirected from protected route
+    const authParam = searchParams.get("auth");
+    if ((authParam === "sign-in" || authParam === "sign-up") && !authOpen) {
+        setAuthMode(authParam);
         setAuthOpen(true);
     }
 
@@ -152,9 +151,9 @@ export default function LandingPage() {
                     ].map((item) => (
                         <div
                             key={item.step}
-                            className="group relative overflow-hidden rounded-2xl border border-white/5 bg-white/[0.02] p-8 transition-all hover:border-orange-500/20 hover:bg-white/[0.04]"
+                            className="group relative overflow-hidden rounded-2xl border border-white/5 bg-white/2 p-8 transition-all hover:border-orange-500/20 hover:bg-white/4"
                         >
-                            <span className="text-5xl font-black text-white/[0.03] transition-colors group-hover:text-orange-500/10">
+                            <span className="text-5xl font-black text-white/3 transition-colors group-hover:text-orange-500/10">
                                 {item.step}
                             </span>
                             <h3 className="mt-4 text-lg font-semibold text-white">
@@ -170,7 +169,7 @@ export default function LandingPage() {
 
             {/* Open Source */}
             <section className="mx-auto max-w-6xl px-6 py-24">
-                <div className="relative overflow-hidden rounded-3xl border border-emerald-500/20 bg-gradient-to-br from-emerald-500/[0.03] to-transparent p-[1px]">
+                <div className="relative overflow-hidden rounded-3xl border border-emerald-500/20 bg-linear-to-br from-emerald-500/3 to-transparent p-px">
                     <div className="rounded-3xl bg-zinc-950 px-8 py-16 md:px-16">
                         <div className="flex flex-col items-center gap-12 md:flex-row">
                             {/* Left — Icon + Text */}
@@ -192,7 +191,7 @@ export default function LandingPage() {
                                     Open Source
                                 </div>
                                 <h2 className="text-3xl font-bold text-white">
-                                    Free forever with{" "}
+                                    Free forever with
                                     <span className="text-emerald-400">
                                         your own API key
                                     </span>
@@ -240,9 +239,9 @@ export default function LandingPage() {
                             </div>
 
                             {/* Right — Visual comparison */}
-                            <div className="w-full max-w-xs flex-shrink-0">
+                            <div className="w-full max-w-xs shrink-0">
                                 <div className="space-y-4">
-                                    <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/[0.05] p-5">
+                                    <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-5">
                                         <p className="text-sm font-semibold text-emerald-400">
                                             Free (BYO Key)
                                         </p>
@@ -250,30 +249,30 @@ export default function LandingPage() {
                                             <li className="flex items-center gap-2">
                                                 <span className="text-emerald-400">
                                                     ✓
-                                                </span>{" "}
+                                                </span>
                                                 Unlimited summaries
                                             </li>
                                             <li className="flex items-center gap-2">
                                                 <span className="text-emerald-400">
                                                     ✓
-                                                </span>{" "}
+                                                </span>
                                                 Your own OpenAI key
                                             </li>
                                             <li className="flex items-center gap-2">
                                                 <span className="text-emerald-400">
                                                     ✓
-                                                </span>{" "}
+                                                </span>
                                                 Full source code access
                                             </li>
                                             <li className="flex items-center gap-2">
                                                 <span className="text-emerald-400">
                                                     ✓
-                                                </span>{" "}
+                                                </span>
                                                 Self-hosted
                                             </li>
                                         </ul>
                                     </div>
-                                    <div className="rounded-xl border border-orange-500/20 bg-orange-500/[0.05] p-5">
+                                    <div className="rounded-xl border border-orange-500/20 bg-orange-500/5 p-5">
                                         <p className="text-sm font-semibold text-orange-400">
                                             Pro ($5/mo)
                                         </p>
@@ -281,25 +280,25 @@ export default function LandingPage() {
                                             <li className="flex items-center gap-2">
                                                 <span className="text-orange-400">
                                                     ✓
-                                                </span>{" "}
+                                                </span>
                                                 No API key needed
                                             </li>
                                             <li className="flex items-center gap-2">
                                                 <span className="text-orange-400">
                                                     ✓
-                                                </span>{" "}
+                                                </span>
                                                 One-click install
                                             </li>
                                             <li className="flex items-center gap-2">
                                                 <span className="text-orange-400">
                                                     ✓
-                                                </span>{" "}
+                                                </span>
                                                 Automatic updates
                                             </li>
                                             <li className="flex items-center gap-2">
                                                 <span className="text-orange-400">
                                                     ✓
-                                                </span>{" "}
+                                                </span>
                                                 Zero configuration
                                             </li>
                                         </ul>
@@ -313,7 +312,7 @@ export default function LandingPage() {
 
             {/* CTA */}
             <section className="mx-auto max-w-6xl px-6 py-20">
-                <div className="relative overflow-hidden rounded-3xl border border-white/5 bg-gradient-to-br from-zinc-900 to-zinc-950 px-8 py-16 text-center">
+                <div className="relative overflow-hidden rounded-3xl border border-white/5 bg-linear-to-br from-zinc-900 to-zinc-950 px-8 py-16 text-center">
                     <div className="pointer-events-none absolute -right-20 -top-20 h-60 w-60 rounded-full bg-orange-500/10 blur-[80px]" />
                     <div className="pointer-events-none absolute -bottom-20 -left-20 h-60 w-60 rounded-full bg-orange-500/5 blur-[80px]" />
                     <div className="relative">
