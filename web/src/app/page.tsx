@@ -347,9 +347,19 @@ export default function LandingPage() {
 
             {/* Footer */}
             <footer className="border-t border-white/5 px-6 py-8">
-                <div className="mx-auto max-w-6xl text-center text-sm text-zinc-600">
-                    &copy; {new Date().getFullYear()} Redditist. All rights
-                    reserved.
+                <div className="mx-auto max-w-6xl flex flex-col items-center gap-4 text-sm text-zinc-600">
+                    <div className="flex items-center gap-6">
+                        <Link href="/privacy-policy" className="hover:text-zinc-400 transition-colors">
+                            Privacy Policy
+                        </Link>
+                        <Link href="/contact" className="hover:text-zinc-400 transition-colors">
+                            Contact
+                        </Link>
+                    </div>
+                    <div>
+                        &copy; {new Date().getFullYear()} Redditist. All rights
+                        reserved.
+                    </div>
                 </div>
             </footer>
 
