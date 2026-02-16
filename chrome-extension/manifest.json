@@ -11,13 +11,14 @@
   "host_permissions": [
     "https://www.reddit.com/*",
     "https://old.reddit.com/*",
-    "http://localhost:3000/*",
-    "https://redditist.com/*"
+    "https://redditist.com/*",
+    "https://www.redditist.com/*",
+    "https://api.openai.com/*"
   ],
   "externally_connectable": {
     "matches": [
-      "http://localhost:3000/*",
-      "https://redditist.com/*"
+      "https://redditist.com/*",
+      "https://www.redditist.com/*"
     ]
   },
   "action": {
@@ -36,6 +37,15 @@
       ],
       "js": [
         "content.js"
+      ]
+    },
+    {
+      "matches": [
+        "https://redditist.com/*",
+        "https://www.redditist.com/*"
+      ],
+      "js": [
+        "auth-content.js"
       ]
     }
   ],

@@ -8,43 +8,7 @@
     </head>
     <body>
         <div class="container">
-            <!-- Auth Section (Not signed in) -->
-            <div id="auth-section" class="hidden">
-                <header>
-                    <h1>🔥 Redditist</h1>
-                    <div class="header-spacer"></div>
-                </header>
-                <div class="section">
-                    <div class="auth-prompt">
-                        <p>Sign in to your Redditist account to start summarizing Reddit posts with AI.</p>
-                        <button id="signInBtn" class="btn-primary">Sign In</button>
-                        <p class="auth-subtext">Don't have an account? <a href="http://localhost:3000/sign-up" target="_blank" class="link">Sign up</a></p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- No Subscription Section -->
-            <div id="no-sub-section" class="hidden">
-                <header>
-                    <h1>🔥 Redditist</h1>
-                    <button id="signOutBtn1" class="btn-icon" title="Sign Out">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                            <polyline points="16 17 21 12 16 7"></polyline>
-                            <line x1="21" y1="12" x2="9" y2="12"></line>
-                        </svg>
-                    </button>
-                </header>
-                <div class="section">
-                    <div class="auth-prompt">
-                        <p>You need an active subscription to use Redditist.</p>
-                        <button id="subscribeBtn" class="btn-primary">Subscribe Now</button>
-                        <p class="auth-subtext"><a href="http://localhost:3000/dashboard" target="_blank" class="link">Go to Dashboard</a></p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Main Page (Signed in + active sub) -->
+            <!-- Main Page -->
             <div id="main-page" class="hidden">
                 <header>
                     <h1>🔥 Redditist</h1>
@@ -141,6 +105,19 @@
 
                 <div class="section">
                     <div class="settings-group">
+                        <h3>OpenAI API Key</h3>
+                        <div class="api-key-container">
+                            <label>Use your own OpenAI key for free, unlimited summaries</label>
+                            <input type="password" id="openaiKeyInput" placeholder="sk-..." />
+                            <div class="api-key-actions">
+                                <button id="saveKeyBtn" class="btn-small">Save Key</button>
+                                <button id="clearKeyBtn" class="btn-small btn-danger">Clear</button>
+                            </div>
+                            <p id="keyStatus" class="status hidden"></p>
+                        </div>
+                    </div>
+
+                    <div class="settings-group">
                         <h3>Summary Language</h3>
                         <div class="language-select">
                             <select id="language">
@@ -169,12 +146,21 @@
                     </div>
 
                     <div class="settings-group">
-                        <h3>Account</h3>
+                        <h3>Redditist Account</h3>
                         <div class="account-info">
-                            <p id="accountStatus">Checking...</p>
-                            <div class="api-key-actions">
-                                <a href="http://localhost:3000/dashboard" target="_blank" class="btn-small">Manage Subscription</a>
-                                <button id="signOutBtn2" class="btn-small btn-danger">Sign Out</button>
+                            <p id="accountStatus">Not signed in</p>
+                            <div id="signedOutActions">
+                                <p class="settings-hint">Sign in to use our service instead of your own API key</p>
+                                <div class="api-key-actions">
+                                    <button id="signInBtn" class="btn-small">Sign In</button>
+                                    <a href="https://redditist.com/sign-up" target="_blank" class="btn-small">Sign Up</a>
+                                </div>
+                            </div>
+                            <div id="signedInActions" class="hidden">
+                                <div class="api-key-actions">
+                                    <a href="https://redditist.com/dashboard" target="_blank" class="btn-small">Manage Subscription</a>
+                                    <button id="signOutBtn" class="btn-small btn-danger">Sign Out</button>
+                                </div>
                             </div>
                         </div>
                     </div>

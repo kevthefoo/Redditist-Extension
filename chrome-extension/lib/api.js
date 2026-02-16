@@ -1,6 +1,6 @@
 // Backend API client for Redditist extension
 
-const API_BASE = 'http://localhost:3000'; // Change to https://redditist.com in production
+const API_BASE = 'https://redditist.com';
 
 export async function checkSubscription(token) {
   const res = await fetch(`${API_BASE}/api/subscription/status`, {

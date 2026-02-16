@@ -404,6 +404,12 @@ header h1 {
   text-decoration: underline;
 }
 
+.settings-hint {
+  font-size: 12px;
+  color: #818384;
+  margin-bottom: 8px;
+}
+
 .account-info {
   display: flex;
   flex-direction: column;

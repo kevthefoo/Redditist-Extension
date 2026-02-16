@@ -21,7 +21,7 @@ The extension lives in `chrome-extension/` and has no build step — it's plain 
 
 - **Auth flow**: The website sends auth tokens to the extension via `chrome.runtime.sendMessage` using `externally_connectable`. Tokens are stored in `chrome.storage.local`.
 - **Message passing**: Popup → Background (via `chrome.runtime.sendMessage`) for API calls. Popup → Content Script (via `chrome.tabs.sendMessage`) for Reddit data extraction.
-- **API base URL**: Hardcoded as `http://localhost:3000` in three files (`background.js`, `popup.js`, `lib/api.js`). Must be changed to `https://redditist.com` for production.
+- **API base URL**: `https://redditist.com` — configured in `background.js`, `popup.js`, and `lib/api.js`.
 
 ## Development
 
